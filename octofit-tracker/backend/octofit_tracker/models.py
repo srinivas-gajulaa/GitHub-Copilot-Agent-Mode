@@ -1,47 +1,32 @@
-from django.db import models
-from django.contrib.auth.models import User
+from djongo import models
+from bson import ObjectId
 
-class StudentProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    age = models.IntegerField()
-    grade = models.CharField(max_length=10)
-    total_steps = models.PositiveIntegerField(default=0)
-    total_minutes_exercised = models.PositiveIntegerField(default=0)
-
-    def __str__(self):
-        return self.user.username
-
-class TeacherProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    subject = models.CharField(max_length=100)
-    bio = models.TextField()
-
-    def __str__(self):
-        return self.user.username
-
-class FitnessActivity(models.Model):
-    ACTIVITY_CHOICES = [
-        ('Running', 'Running'),
-        ('Walking', 'Walking'),
-        ('Cycling', 'Cycling'),
-        ('Swimming', 'Swimming'),
-        ('Yoga', 'Yoga'),
-    ]
-
-    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
-    date = models.DateField()
-    activity_type = models.CharField(max_length=50, choices=ACTIVITY_CHOICES)
-    duration_minutes = models.PositiveIntegerField()
-    steps = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.activity_type} by {self.student.user.username} on {self.date}"
+class User(models.Model):
+    _id = models.ObjectIdField()
+    username = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=100)
 
 class Team(models.Model):
+    _id = models.ObjectIdField(primary_key=True, default=ObjectId)
     name = models.CharField(max_length=100)
-    members = models.ManyToManyField(StudentProfile)
-    goal_description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    members = models.JSONField(
+        null=True,
+        default=list
+    )
 
-    def __str__(self):
-        return self.name
+class Activity(models.Model):
+    _id = models.ObjectIdField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=100)
+    duration = models.DurationField()
+
+class Leaderboard(models.Model):
+    _id = models.ObjectIdField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.IntegerField()
+
+class Workout(models.Model):
+    _id = models.ObjectIdField()
+    name = models.CharField(max_length=100)
+    description = models.TextField()
