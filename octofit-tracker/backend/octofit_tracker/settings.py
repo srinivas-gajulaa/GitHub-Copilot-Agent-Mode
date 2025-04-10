@@ -139,3 +139,5 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
+
+CODESPACE_API_SUFFIX = "-8000.app.github.dev"
